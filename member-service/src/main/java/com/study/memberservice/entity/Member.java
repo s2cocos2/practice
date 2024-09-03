@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User extends Timestamped {
+public class Member extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    private Long userId;
+    private Long memberId;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -44,8 +44,8 @@ public class User extends Timestamped {
 //    private List<Post> postList = new ArrayList<>();
 
 
-    public User(String email, String name, String phoneNumber, String identify,
-                String nickname, String password, String address, UserRoleEnum role) {
+    public Member(String email, String name, String phoneNumber, String identify,
+                  String nickname, String password, String address, UserRoleEnum role) {
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;

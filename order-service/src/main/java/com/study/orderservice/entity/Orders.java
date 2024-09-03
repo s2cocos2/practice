@@ -28,9 +28,8 @@ public class Orders extends Timestamped {
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @Column(nullable = false)
+    private Long memberId;
 
     // 수정하기
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)

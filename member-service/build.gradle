@@ -40,8 +40,8 @@ dependencies {
 //    implementation 'io.github.resilience4j:resilience4j-micrometer'
 //    implementation 'io.micrometer:micrometer-registry-prometheus'
 //
-//    // Feign Client
-//    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    // Feign Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     // security
     implementation 'org.springframework.boot:spring-boot-starter-security'

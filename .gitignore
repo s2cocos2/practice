@@ -39,3 +39,5 @@ out/
 ### add ###
 application.yml
 application.properties
+.env
+mysql_data/
