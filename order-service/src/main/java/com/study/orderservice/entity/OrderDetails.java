@@ -23,10 +23,8 @@ public class OrderDetails extends Timestamped {
     @JoinColumn(name = "orders_id", nullable = false)
     private Orders orders;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "product_id", nullable = false)
-//    private Product product;
-
+    @Column(nullable = false)
+    private Long productId;
 
 //    public OrderDetails(Product product, Long price, Long count){
 //        this.product = product;
