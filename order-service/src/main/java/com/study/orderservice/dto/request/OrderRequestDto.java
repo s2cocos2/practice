@@ -1,9 +1,12 @@
 package com.study.orderservice.dto.request;
 
+import lombok.Getter;
+
+@Getter
 public record OrderRequestDto(
 
         Long productId,
-        Long userId,
+        Long memberId,
         Long count
 ) {
 }

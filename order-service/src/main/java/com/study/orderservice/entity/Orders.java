@@ -35,7 +35,8 @@ public class Orders extends Timestamped {
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetails> orderDetailsList = new ArrayList<>();
 
-    public Orders(OrderStatusEnum status) {
+    public Orders(Long memberId, OrderStatusEnum status) {
+        this.memberId = memberId;
         this.status = status;
     }
 

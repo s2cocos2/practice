@@ -25,22 +25,22 @@ public class WishListController {
     }
 
     // wishlist 조회
-    @GetMapping("")
-    public ResponseEntity<CommonResponse<List<WishListResponseDto>>> getWishList(){
-        return new ResponseEntity<>(wishListService.getWishList(), HttpStatus.OK);
+    @GetMapping("/{memberId}")
+    public ResponseEntity<CommonResponse<List<WishListResponseDto>>> getWishList(@PathVariable Long memberId){
+        return new ResponseEntity<>(wishListService.getWishList(memberId), HttpStatus.OK);
     }
 
     // wishlist 수정
     @PatchMapping("{wishListId}")
     public ResponseEntity<CommonResponse> updateWishList(@PathVariable Long wishListId, @RequestBody WishListRequestDto requestDto){
-        return new ResponseEntity<>(wishListService.updateWishList(wishListId, requestDto), HttpStatus.OK);
+        return new ResponseEntity<>(wishListService.updateWishList(wishListId, requestDto), HttpStatus.CREATED);
     }
 
 
     // wishlist 삭제
     @DeleteMapping("{wishListId}")
     public ResponseEntity<CommonResponse> deleteWishList(@PathVariable Long wishListId){
-        return new ResponseEntity<>(wishListService.deleteWishList(wishListId), HttpStatus.OK);
+        return new ResponseEntity<>(wishListService.deleteWishList(wishListId), HttpStatus.CREATED);
     }
 
 }

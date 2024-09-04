@@ -2,7 +2,7 @@ package com.study.memberservice.service;
 
 import com.study.memberservice.dto.request.LoginRequestDto;
 import com.study.memberservice.entity.RefreshToken;
-import com.study.memberservice.entity.User;
+import com.study.memberservice.entity.Member;
 import com.study.memberservice.exception.CommonException;
 import com.study.memberservice.repository.RefreshTokenRepository;
 import com.study.memberservice.repository.UserRepository;
@@ -34,17 +34,17 @@ public class LoginService {
 
     @Transactional
     public CommonResponse login(LoginRequestDto requestDto, HttpServletResponse response){
-        User user = userRepository.findByIdentify(requestDto.identify()).orElseThrow(() ->
+        Member member = userRepository.findByIdentify(requestDto.identify()).orElseThrow(() ->
                 new CommonException(NO_ACCOUNT));
-        if(!passwordEncoder.matches(requestDto.password(), user.getPassword())){
+        if(!passwordEncoder.matches(requestDto.password(), member.getPassword())){
             throw new CommonException(INVALID_PASSWORDS);
         }
 
-        String accessToken = jwtUtil.createAccessToken(user.getUserId(), user.getRole());
-        String refreshToken = jwtUtil.createRefreshToken(user.getUserId());
+        String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole());
+        String refreshToken = jwtUtil.createRefreshToken(member.getMemberId());
 
-        refreshTokenRepository.deleteByUserId(user.getUserId());
-        RefreshToken refreshTokenEntity = new RefreshToken(refreshToken.substring(7), user.getUserId());
+        refreshTokenRepository.deleteByUserId(member.getMemberId());
+        RefreshToken refreshTokenEntity = new RefreshToken(refreshToken.substring(7), member.getMemberId());
         refreshTokenRepository.save(refreshTokenEntity);
 
         response.addHeader(AUTHORIZATION_ACCESS, accessToken);

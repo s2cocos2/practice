@@ -1,10 +1,11 @@
 package com.study.productservice.service;
 
-import com.study.productservice.dto.ProductRequestDto;
 import com.study.productservice.dto.ProductResponseDto;
 import com.study.productservice.entity.Product;
 import com.study.productservice.exception.CommonException;
 import com.study.productservice.repository.ProductRepository;
+import com.study.productservice.response.CommonResponse;
+import com.study.productservice.response.SuccessMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,40 +15,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.study.productservice.exception.errorcode.ClientErrorCode.*;
+import static com.study.productservice.response.SuccessMessage.*;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
     private final ProductRepository productRepository;
-//    private final FolderRepository folderRepository;
-//    private final ProductFolderRepository productFolderRepository;
-//    private final MessageSource messageSource;
-
-    //상품 등록
-    public ProductResponseDto createProduct(ProductRequestDto requestDto) {
-//        Product product = productRepository.save(new Product(requestDto));
-//        return new ProductResponseDto(product);
-        return null;
-    }
 
     // 상품 전체 조회
     @Transactional(readOnly = true)
-    public Page<ProductResponseDto> getProducts(int page, int size, String sortBy, boolean isAsc) {
+    public CommonResponse<Page<ProductResponseDto>> getAllProducts(int page, int size, String sortBy, boolean isAsc) {
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-
         Page<Product> productList;
 
         productList = productRepository.findAll(pageable);
+        Page<ProductResponseDto> productResponseDtos = productList.map(ProductResponseDto::new);
 
-        return productList.map(ProductResponseDto::new);
-
+        return new CommonResponse(GET_ALL_PRODUCTS_SUCCESS, productResponseDtos);
     }
 
-//    // 상품 전체 조회
+    //상품 상세 조회
+    @Transactional(readOnly = true)
+    public CommonResponse<ProductResponseDto> getProducts(Long productId) {
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new CommonException(NO_PRODUCT));
+
+        ProductResponseDto productResponseDto = new ProductResponseDto(product);
+        return new CommonResponse(GET_PRODUCTS_SUCCESS, productResponseDto);
+    }
+
+
+    // 상품 전체 조회
 //    @Transactional(readOnly = true)
 //    public Page<ProductResponseDto> getProducts(User user, int page, int size, String sortBy, boolean isAsc) {
 //        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -66,16 +68,6 @@ public class ProductService {
 //        return productList.map(ProductResponseDto::new);
 //
 //    }
-
-    //상품 상세 조회
-    @Transactional(readOnly = true)
-    public ProductResponseDto getProduct(Long productId) {
-        Product product = productRepository.findById(productId).orElseThrow(
-                () -> new CommonException(NO_PRODUCT));
-
-        ProductResponseDto productResponseDto = new ProductResponseDto(product);
-        return productResponseDto;
-    }
 
 //    @Transactional
 //    public ProductResponseDto updateProduct(Long id, ProductMypriceRequestDto requestDto) {

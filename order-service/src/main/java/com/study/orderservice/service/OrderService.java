@@ -1,124 +1,133 @@
 package com.study.orderservice.service;
 
+import com.study.orderservice.client.MemberServiceClient;
+import com.study.orderservice.client.ProductServiceClient;
 import com.study.orderservice.dto.request.OrderRequestDto;
+import com.study.orderservice.dto.response.MemberResponseDto;
 import com.study.orderservice.dto.response.OrderResponseDto;
+import com.study.orderservice.dto.response.ProductResponseDto;
+import com.study.orderservice.entity.OrderDetails;
+import com.study.orderservice.entity.Orders;
+import com.study.orderservice.exception.CommonException;
 import com.study.orderservice.repository.OrderRepository;
 import com.study.orderservice.response.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import static com.study.orderservice.exception.errorcode.ClientErrorCode.*;
+import static com.study.orderservice.response.SuccessMessage.*;
+import static com.study.orderservice.type.OrderStatusEnum.*;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
-//    private final UserRepository userRepository;
-//    private final ProductRepository productRepository;
-    // TODO : user, product 연결
-
+    private final MemberServiceClient memberServiceClient;
+    private final ProductServiceClient productServiceClient;
 
     // 주문 하기
     @Transactional
-    public List<OrderResponseDto> createOrder(OrderRequestDto requestDto) {
-//    public List<OrderResponseDto> createOrder(OrderRequestDto requestDto, User user) {
-//        User currentUser = userRepository.findById(user.getUserId()).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ACCOUNT));
-//
-//        Product product = productRepository.findById(requestDto.productId()).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_PRODUCT));
+    public CommonResponse createOrder(OrderRequestDto requestDto) {
+        MemberResponseDto member = memberServiceClient.getMemberById(requestDto.getMemberId());
+        if (member == null) {
+            throw new CommonException(NO_ACCOUNT);
+        }
 
-//        OrderDetails orderDetails = new OrderDetails(product, requestDto.count(), product.getPrice());
-//
-//        Orders orders = new Orders(currentUser, OrderStatusEnum.ORDERED);
-//        orders.addOrderDetails(orderDetails);
+        ProductResponseDto product = productServiceClient.getProductById(requestDto.getProductId());
+        if (product == null) {
+            throw new CommonException(NO_PRODUCT);
+        }
 
-//        orderRepository.save(orders);
-//        List<OrderResponseDto> responseDtos = orders.getOrderDetailsList().stream()
-//                .map(OrderResponseDto::new)
-//                .collect(Collectors.toList());
-//        return responseDtos;
-        return null;
+        OrderDetails orderDetails = new OrderDetails(product.getProductId(), requestDto.count(), product.getPrice());
 
+        Orders orders = new Orders(member.getMemberId(), ORDERED);
+        orders.addOrderDetails(orderDetails);
+
+        orderRepository.save(orders);
+
+        return new CommonResponse(ORDER_SUCCESS);
     }
 
     // 주문 조회
     @Transactional(readOnly = true)
     public CommonResponse<OrderResponseDto> getOrder(Long orderId) {
-//        User user = userRepository.findById(userId).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ACCOUNT));
+        Orders orders = orderRepository.findById(orderId).orElseThrow(
+                () -> new CommonException(NO_ORDER));
 
-//        Orders orders = orderRepository.findById(orderId).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ORDER));
-//
-//        OrderDetails orderDetails = orders.getOrderDetailsList().stream()
-//                .findFirst().orElseThrow(() -> new CommonException(ClientErrorCode.NO_ORDER_DETAILS));
+        OrderDetails orderDetails = orders.getOrderDetailsList().stream()
+                .findFirst().orElseThrow(() -> new CommonException(NO_ORDER_DETAILS));
 
-//        return new CommonResponse("Orders details retrieved successfully", orderDetails);
-        return null;
+        OrderResponseDto orderResponseDto = new OrderResponseDto(orderDetails);
+
+        return new CommonResponse(GET_ORDER_SUCCESS, orderResponseDto);
     }
 
     // 주문 취소
     @Transactional
     public CommonResponse cancelOrder(Long orderId) {
-//        userRepository.findById(userId).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ACCOUNT));
-//
-//        Orders orders = orderRepository.findById(orderId).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ORDER));
-//
-//        if (orders.getStatus() != OrderStatusEnum.ORDERED) {
-//            throw new CommonException(ClientErrorCode.INVALID_ORDER_STATUS);
-//        }
-//
-//        orders.changeStatus(OrderStatusEnum.CANCELED);
-//        orderRepository.save(orders);
-//
-//        List<OrderDetails> orderDetailsList = orders.getOrderDetailsList();
-//        for (int i = 0; i < orderDetailsList.size(); i++) {
-//            OrderDetails orderDetails = orderDetailsList.get(i);
-//            Product product = orderDetails.getProduct();
-//            Long count = orderDetails.getCount();
-//
-//            product.reStock(product.getStock() + count);
-//            productRepository.save(product);
-//        }
-//        return new CommonResponse("성공");
-        return null;
+        Orders orders = orderRepository.findById(orderId).orElseThrow(
+                () -> new CommonException(NO_ORDER));
+
+        if (orders.getStatus() != ORDERED) {
+            throw new CommonException(INVALID_ORDER_STATUS);
+        }
+
+        orders.changeStatus(CANCELED);
+        orderRepository.save(orders);
+
+        // 재고 업데이트
+        List<OrderDetails> orderDetailsList = orders.getOrderDetailsList();
+        for (int i = 0; i < orderDetailsList.size(); i++) {
+            OrderDetails orderDetails = orderDetailsList.get(i);
+            Long productId = orderDetails.getProductId();
+            Long count = orderDetails.getCount();
+
+            ProductResponseDto product = productServiceClient.getProductById(productId);
+            if (product == null) {
+                throw new CommonException(NO_PRODUCT);
+            }
+
+            productServiceClient.updateProductStock(productId, product.getStock() + count);
+
+        }
+        return new CommonResponse(ORDER_CANCEL);
 
     }
 
     // 반품하기
     @Transactional
     public CommonResponse returnOrder(Long orderId, Long productId) {
-//        userRepository.findById(user.getUserId()).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ACCOUNT));
-//
-//        Orders orders = orderRepository.findById(orderId).orElseThrow(
-//                () -> new CommonException(ClientErrorCode.NO_ORDER));
-//
-//        OrderDetails orderDetails = orders.getOrderDetailsList().stream()
-//                .filter(od -> od.getProduct().getProductId().equals(productId))
-//                .findFirst()
-//                .orElseThrow(() -> new CommonException(ClientErrorCode.NO_ORDER_DETAILS));
-//
-//        if (orders.getOrderDate().plusDays(3).isBefore(LocalDate.now())) {
-//            throw new CommonException(ClientErrorCode.RETURN_EXPIRED);
-//        }
-//
-//        Product product = orderDetails.getProduct();
-//        Long count = orderDetails.getCount();
-//        product.reStock(product.getStock() + count);
-//        productRepository.save(product);
-//
-//        orderDetails.removeOrders();
-//        orders.getOrderDetailsList().removeIf(od -> od.equals(orderDetails));
-//        orderRepository.save(orders);
-//
-//        return new CommonResponse<>("성공적으로 반품 되었습니다.");
-        return null;
+        Orders orders = orderRepository.findById(orderId).orElseThrow(
+                () -> new CommonException(NO_ORDER));
+
+        OrderDetails orderDetails = orders.getOrderDetailsList().stream()
+                .filter(od -> od.getProductId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new CommonException(NO_ORDER_DETAILS));
+
+        if (orders.getOrderDate().plusDays(3).isBefore(LocalDate.now())) {
+            throw new CommonException(RETURN_EXPIRED);
+        }
+
+        Long count = orderDetails.getCount();
+
+        ProductResponseDto product = productServiceClient.getProductById(productId);
+        if (product == null) {
+            throw new CommonException(NO_PRODUCT);
+        }
+
+        productServiceClient.updateProductStock(productId, product.getStock() + count);
+
+        orderDetails.removeOrders();
+        orders.getOrderDetailsList().removeIf(od -> od.equals(orderDetails));
+        orderRepository.save(orders);
+
+        return new CommonResponse(RETURN_ORDER);
 
     }
 }
