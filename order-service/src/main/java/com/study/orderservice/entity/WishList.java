@@ -22,11 +22,11 @@ public class WishList extends Timestamped {
     @Column(nullable = false)
     private Long count;
 
-//    public WishList(User user, Product product, Long count) {
-//        this.user = user;
-//        this.product = product;
-//        this.count = count;
-//    }
+    public WishList(Long memberId, Long productId, Long count) {
+        this.memberId = memberId;
+        this.productId = productId;
+        this.count = count;
+    }
 
     public void updateCount(Long newCount) {
         this.count = newCount;

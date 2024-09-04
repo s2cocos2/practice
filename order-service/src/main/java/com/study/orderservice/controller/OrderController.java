@@ -20,8 +20,8 @@ public class OrderController {
 
     // 주문하기
     @PostMapping("")
-    public List<OrderResponseDto> createOrder(@RequestBody OrderRequestDto requestDto){
-        return orderService.createOrder(requestDto);
+    public ResponseEntity<CommonResponse> createOrder(@RequestBody OrderRequestDto requestDto){
+        return new ResponseEntity<>(orderService.createOrder(requestDto), HttpStatus.CREATED);
     }
 
     // 주문 조회하기

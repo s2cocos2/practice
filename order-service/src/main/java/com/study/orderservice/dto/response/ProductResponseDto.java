@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberResponseDto {
-    private Long memberId;
-    private String name;
-    private String email;
+public class ProductResponseDto {
+    private Long productId;
+    private String title;
+    private Long price;
+    private Long stock;
 }

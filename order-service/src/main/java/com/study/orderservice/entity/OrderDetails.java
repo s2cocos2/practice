@@ -26,11 +26,11 @@ public class OrderDetails extends Timestamped {
     @Column(nullable = false)
     private Long productId;
 
-//    public OrderDetails(Product product, Long price, Long count){
-//        this.product = product;
-//        this.price = price;
-//        this.count = count;
-//    }
+    public OrderDetails(Long productId, Long price, Long count){
+        this.productId = productId;
+        this.price = price;
+        this.count = count;
+    }
     public OrderDetails(Long price, Long count){
         this.price = price;
         this.count = count;

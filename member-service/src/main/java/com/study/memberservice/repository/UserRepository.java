@@ -1,13 +1,13 @@
 package com.study.memberservice.repository;
 
-import com.study.memberservice.entity.User;
+import com.study.memberservice.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);
-    Optional<User> findByNickname(String nickName);
-    Optional<User> findByUserId(Long userId);
-    Optional<User> findByIdentify(String identify);
+public interface UserRepository extends JpaRepository<Member, Long> {
+    Optional<Member> findByEmail(String email);
+    Optional<Member> findByNickname(String nickName);
+    Optional<Member> findByUserId(Long userId);
+    Optional<Member> findByIdentify(String identify);
 }
