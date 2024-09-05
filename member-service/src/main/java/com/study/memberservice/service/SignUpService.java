@@ -8,7 +8,7 @@ import com.study.memberservice.entity.Email;
 import com.study.memberservice.entity.Member;
 import com.study.memberservice.exception.CommonException;
 import com.study.memberservice.repository.EmailRepository;
-import com.study.memberservice.repository.UserRepository;
+import com.study.memberservice.repository.MemberRepository;
 import com.study.memberservice.response.CommonResponse;
 import com.study.memberservice.type.UserRoleEnum;
 import com.study.memberservice.util.EmailUtil;
@@ -25,7 +25,7 @@ import static com.study.memberservice.response.SuccessMessage.*;
 @RequiredArgsConstructor
 public class SignUpService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailRepository emailRepository;
     private final EmailUtil emailUtil;
@@ -60,7 +60,7 @@ public class SignUpService {
         }
 
         Member member = new Member(email, name, phoneNumber, id, nickname, password, address, role);
-        Member savedMember =  userRepository.save(member);
+        Member savedMember =  memberRepository.save(member);
         if(savedMember == null){
             throw new CommonException(SIGNUP_FAILED);
         }
@@ -78,7 +78,7 @@ public class SignUpService {
 
 
     public boolean existingNickname(String nickname){
-        Optional<Member> existingNickname = userRepository.findByNickname(nickname);
+        Optional<Member> existingNickname = memberRepository.findByNickname(nickname);
         if(existingNickname.isPresent()){
             return true;
         } else {
@@ -88,7 +88,7 @@ public class SignUpService {
 
     public CommonResponse sendEmail(SendEmailRequestDto requestDto) {
 
-        userRepository.findByEmail(requestDto.email()).ifPresent(existingMember -> {
+        memberRepository.findByEmail(requestDto.email()).ifPresent(existingMember -> {
             throw new CommonException(DUPLICATE_EMAIL);
         });
 

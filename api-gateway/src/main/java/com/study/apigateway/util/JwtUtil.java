@@ -1,12 +1,12 @@
-package com.study.memberservice.util;
+package com.study.apigateway.util;
 
-import com.study.memberservice.type.UserRoleEnum;
+import com.study.apigateway.type.UserRoleEnum;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -71,14 +71,14 @@ public class JwtUtil {
                         .compact();
     }
 
-    public String getJwtFromHeader(HttpServletRequest request, String tokenType) {
+    public String getJwtFromHeader(ServerHttpRequest request, String tokenType) {
         if(tokenType.equals("Access")){
-            String bearerToken = request.getHeader(AUTHORIZATION_ACCESS);
+            String bearerToken = request.getHeaders().getFirst(AUTHORIZATION_ACCESS);
             if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
                 return bearerToken.substring(7);
             }
         }else {
-            String bearerToken = request.getHeader(AUTHORIZATION_REFRESH);
+            String bearerToken = request.getHeaders().getFirst(AUTHORIZATION_REFRESH);
             if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
                 return bearerToken.substring(7);
             }
