@@ -33,12 +33,12 @@ public class OrderService {
     // 주문 하기
     @Transactional
     public CommonResponse createOrder(OrderRequestDto requestDto) {
-        MemberResponseDto member = memberServiceClient.getMemberById(requestDto.getMemberId());
+        MemberResponseDto member = memberServiceClient.getMemberById(requestDto.memberId());
         if (member == null) {
             throw new CommonException(NO_ACCOUNT);
         }
 
-        ProductResponseDto product = productServiceClient.getProductById(requestDto.getProductId());
+        ProductResponseDto product = productServiceClient.getProductById(requestDto.productId());
         if (product == null) {
             throw new CommonException(NO_PRODUCT);
         }

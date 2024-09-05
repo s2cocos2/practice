@@ -5,7 +5,7 @@ import com.study.memberservice.entity.RefreshToken;
 import com.study.memberservice.entity.Member;
 import com.study.memberservice.exception.CommonException;
 import com.study.memberservice.repository.RefreshTokenRepository;
-import com.study.memberservice.repository.UserRepository;
+import com.study.memberservice.repository.MemberRepository;
 import com.study.memberservice.response.CommonResponse;
 import com.study.memberservice.type.UserRoleEnum;
 import com.study.memberservice.util.JwtUtil;
@@ -26,7 +26,7 @@ import static com.study.memberservice.util.JwtUtil.*;
 @RequiredArgsConstructor
 public class LoginService {
 
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -34,7 +34,7 @@ public class LoginService {
 
     @Transactional
     public CommonResponse login(LoginRequestDto requestDto, HttpServletResponse response){
-        Member member = userRepository.findByIdentify(requestDto.identify()).orElseThrow(() ->
+        Member member = memberRepository.findByIdentify(requestDto.identify()).orElseThrow(() ->
                 new CommonException(NO_ACCOUNT));
         if(!passwordEncoder.matches(requestDto.password(), member.getPassword())){
             throw new CommonException(INVALID_PASSWORDS);
@@ -43,7 +43,7 @@ public class LoginService {
         String accessToken = jwtUtil.createAccessToken(member.getMemberId(), member.getRole());
         String refreshToken = jwtUtil.createRefreshToken(member.getMemberId());
 
-        refreshTokenRepository.deleteByUserId(member.getMemberId());
+        refreshTokenRepository.deleteByMemberId(member.getMemberId());
         RefreshToken refreshTokenEntity = new RefreshToken(refreshToken.substring(7), member.getMemberId());
         refreshTokenRepository.save(refreshTokenEntity);
 
@@ -64,9 +64,9 @@ public class LoginService {
                 refreshTokenRepository.findByRefreshToken(refreshToken).orElseThrow(
                         ()-> new CommonException(NO_REFRESHTOKEN));
 
-                Long userId = jwtUtil.getUserInfoFromRefreshToken(refreshToken);
+                Long memberId = jwtUtil.getMemberInfoFromRefreshToken(refreshToken);
 
-                String newAccessToken = jwtUtil.createAccessToken(userId, UserRoleEnum.USER);
+                String newAccessToken = jwtUtil.createAccessToken(memberId, UserRoleEnum.USER);
 
                 response.addHeader(AUTHORIZATION_ACCESS, newAccessToken);
                 return new CommonResponse(CREATE_REFRESHTOKEN);

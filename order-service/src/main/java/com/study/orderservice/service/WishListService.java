@@ -40,7 +40,7 @@ public class WishListService {
             throw new CommonException(NO_PRODUCT);
         }
 
-        WishList existingWishListItem = wishListRepository.findByMemberAndProduct(requestDto.memberId(), requestDto.productId());
+        WishList existingWishListItem = wishListRepository.findByMemberIdAndProductId(requestDto.memberId(), requestDto.productId());
         if (existingWishListItem != null) {
             existingWishListItem.updateCount(existingWishListItem.getCount() + requestDto.count());
             wishListRepository.save(existingWishListItem);

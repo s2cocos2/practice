@@ -10,16 +10,16 @@ import lombok.NoArgsConstructor;
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long refreshTokenId;
 
     @Column(nullable = false)
     private String refreshToken;
 
     @Column(nullable = false)
-    private Long userId;
+    private Long memberId;
 
-    public RefreshToken(String refreshToken, Long userId){
+    public RefreshToken(String refreshToken, Long memberId){
         this.refreshToken = refreshToken;
-        this.userId = userId;
+        this.memberId = memberId;
     }
 }
